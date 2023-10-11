@@ -13,7 +13,15 @@ function App() {
             if(user){
                 setIsLoggedIn(true);
                 // 로그인 된 유저 변수에 넣어줌
-                setUserObj(user);
+                setUserObj({
+                    displayName : user.displayName,
+                    uid: user.uid,
+                    updateProfile: (args) => user.updateProfile(args)
+                });
+                if(user.displayName === null){
+
+
+                }
             }else{
                 setIsLoggedIn(false);
             }
@@ -21,9 +29,18 @@ function App() {
         })
     }, [])
 
+    const refreshUser = () => {
+        const user = authService.currentUser;
+        setUserObj({
+            displayName : user.displayName,
+            uid: user.uid,
+            updateProfile: (args) => user.updateProfile(args)
+        });
+    }
+
   return (
     <div>
-        {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj}/> : "Initializing..."}
+        {init ? <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} refreshUser={refreshUser}/> : "Initializing..."}
       <footer>&copy; {new Date().getFullYear()} Nwitter</footer>
 
     </div>

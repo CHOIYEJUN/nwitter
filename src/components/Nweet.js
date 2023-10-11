@@ -1,14 +1,17 @@
 import react, {useState} from "react";
 import "style/nweetStyle.css";
-import {dbService} from "../fbase";
+import {dbService, storageService} from "../fbase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 const Nweet = ({nweetObj , isOwner}) => {
     const [editing, setEditing] = useState(false);
     const [newNweet, setNewNweet] = useState(nweetObj.text);
 
-    const onDeleteClick = () => {
+    const onDeleteClick = async () => {
         const cheackDelectConfrim = window.confirm("진짜 지울꺼에요?");
         if(cheackDelectConfrim){
-            dbService.doc(`nweets/${nweetObj.id}`).delete();
+            await dbService.doc(`nweets/${nweetObj.id}`).delete();
+            await storageService.refFromURL(nweetObj.attachmentUrl).delete();
         }
     }
 
@@ -27,28 +30,40 @@ const Nweet = ({nweetObj , isOwner}) => {
     const toggleEditing = () => setEditing((prev) => !prev);
 
     return (
-        <div className={"nweetUinit"}>
+        <div className="nweet">
             {editing ?
-                <form>
+                <form onSubmit={onSubmit} className="container nweetEdit">
                     <input
                         value={newNweet}
                         required
                         onChange={onChange}
+                        autoFocus
+                        className="formInput"
                     />
-                    <button onClick={toggleEditing}>취소</button>
-                    <button onClick={onSubmit}>수정</button>
+                    <input type="submit" value="Update Nweet" className="formBtn" />
+                    <span onClick={toggleEditing} className="formBtn cancelBtn">
+                        Cancel
+                    </span>
                 </form>
                 :
                 <>
+
                     <h4>{nweetObj.text}</h4>
+                    {nweetObj.attachmentUrl && <img src={nweetObj.attachmentUrl} />}
+                    <span>작성자 : {nweetObj.displayName}</span>
+
                 </>
                 }
 
             {isOwner && (
-                <>
-                    <button onClick={onDeleteClick}>삭제</button>
-                    <button onClick={toggleEditing}>수정</button>
-                </>
+                <div className="nweet__actions">
+                         <span onClick={onDeleteClick}>
+                         <FontAwesomeIcon icon={faTrash} />
+                         </span>
+                        <span onClick={toggleEditing}>
+                        <FontAwesomeIcon icon={faPencilAlt} />
+                        </span>
+                </div>
             )}
 
         </div>
